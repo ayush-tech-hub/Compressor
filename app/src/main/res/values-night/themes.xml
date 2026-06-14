@@ -2,16 +2,13 @@
 <resources>
     <style name="Theme.CompressX" parent="Theme.Material3.DayNight.NoActionBar">
         <item name="colorPrimary">@color/colorPrimaryDark</item>
-        <item name="colorPrimaryVariant">@color/colorPrimary</item>
         <item name="colorOnPrimary">@color/colorOnBackground</item>
+        <item name="colorPrimaryContainer">@color/colorPrimary</item>
         <item name="colorSecondary">@color/colorSecondaryDark</item>
         <item name="colorOnSecondary">@color/colorOnBackground</item>
         <item name="colorError">@color/colorErrorDark</item>
         <item name="colorOnError">@color/colorOnBackground</item>
         <item name="colorSurface">@color/colorSurfaceDark</item>
         <item name="colorOnSurface">@color/colorOnPrimary</item>
-        <item name="android:statusBarColor">@color/colorBackgroundDark</item>
-        <item name="windowActionBar">false</item>
-        <item name="windowNoTitle">true</item>
     </style>
 </resources>
