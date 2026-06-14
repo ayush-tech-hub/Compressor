@@ -2,15 +2,18 @@ package com.compressx.app.util
 
 import android.content.Context
 import android.graphics.Bitmap
+import android.graphics.Canvas
+import android.graphics.Color
+import android.graphics.Paint
+import android.graphics.pdf.PdfDocument
+import android.graphics.pdf.PdfRenderer
 import android.net.Uri
+import android.os.ParcelFileDescriptor
 import com.compressx.app.model.CompressionResult
 import com.compressx.app.model.PdfCompressionLevel
-import com.tom_roush.pdfbox.pdmodel.PDDocument
-import com.tom_roush.pdfbox.pdmodel.PDPage
-import com.tom_roush.pdfbox.pdmodel.graphics.image.PDImageXObject
-import com.tom_roush.pdfbox.pdmodel.graphics.image.JPEGFactory
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import java.io.ByteArrayOutputStream
 import java.io.File
 
 object PdfCompressor {
@@ -22,11 +25,10 @@ object PdfCompressor {
         outputUri: Uri
     ): CompressionResult = withContext(Dispatchers.IO) {
         var inputTemp: File? = null
-        var outputTemp: File? = null
         try {
             val originalSize = FileUtils.getFileSize(context, inputUri)
 
-            // Copy input URI to a temp file (PDFBox needs file path)
+            // PdfRenderer requires a seekable file descriptor, so copy to temp file first
             inputTemp = FileUtils.copyUriToTempFile(context, inputUri, "pdf")
                 ?: return@withContext CompressionResult(
                     success = false,
@@ -35,25 +37,49 @@ object PdfCompressor {
                     errorMessage = "Failed to read input PDF"
                 )
 
-            outputTemp = FileUtils.createTempFile(context, "compressed_pdf_", "pdf")
+            val scale = compressionLevel.getPageScale()
+            val jpegQuality = compressionLevel.getImageQuality()
 
-            val quality = compressionLevel.getImageQuality()
-            val targetDpi = compressionLevel.getTargetDpi()
+            val pfd = ParcelFileDescriptor.open(inputTemp, ParcelFileDescriptor.MODE_READ_ONLY)
+            val renderer = PdfRenderer(pfd)
+            val document = PdfDocument()
 
-            PDDocument.load(inputTemp).use { document ->
-                val resources = document.documentCatalog.pages
-                for (page in resources) {
-                    compressPageImages(page, document, quality, targetDpi)
+            try {
+                for (i in 0 until renderer.pageCount) {
+                    val page = renderer.openPage(i)
+
+                    val renderWidth = (page.width * scale).toInt().coerceAtLeast(1)
+                    val renderHeight = (page.height * scale).toInt().coerceAtLeast(1)
+
+                    // Render page → bitmap
+                    val pageBitmap = Bitmap.createBitmap(renderWidth, renderHeight, Bitmap.Config.ARGB_8888)
+                    pageBitmap.eraseColor(Color.WHITE)
+                    page.render(pageBitmap, null, null, PdfRenderer.Page.RENDER_MODE_FOR_PRINT)
+                    page.close()
+
+                    // Re-compress via JPEG round-trip to reduce size
+                    val compressed = compressBitmapToJpeg(pageBitmap, jpegQuality)
+                    pageBitmap.recycle()
+
+                    // Draw compressed bitmap into PDF page
+                    val pageInfo = PdfDocument.PageInfo.Builder(renderWidth, renderHeight, i + 1).create()
+                    val docPage = document.startPage(pageInfo)
+                    docPage.canvas.drawBitmap(compressed, 0f, 0f, Paint())
+                    document.finishPage(docPage)
+                    compressed.recycle()
                 }
-                document.save(outputTemp)
+
+                // Write to output URI
+                context.contentResolver.openOutputStream(outputUri)?.use { out ->
+                    document.writeTo(out)
+                }
+            } finally {
+                renderer.close()
+                pfd.close()
+                document.close()
             }
 
-            val compressedSize = outputTemp.length()
-
-            // Copy result to output URI
-            context.contentResolver.openOutputStream(outputUri)?.use { dest ->
-                outputTemp.inputStream().use { src -> src.copyTo(dest) }
-            }
+            val compressedSize = FileUtils.getFileSize(context, outputUri)
 
             CompressionResult(
                 success = true,
@@ -70,56 +96,15 @@ object PdfCompressor {
             )
         } finally {
             inputTemp?.delete()
-            outputTemp?.delete()
         }
     }
 
-    private fun compressPageImages(
-        page: PDPage,
-        document: PDDocument,
-        quality: Int,
-        targetDpi: Int
-    ) {
-        try {
-            val resources = page.resources ?: return
-            val xObjectNames = resources.xObjectNames ?: return
-
-            for (name in xObjectNames) {
-                val xObject = resources.getXObject(name)
-                if (xObject is PDImageXObject) {
-                    try {
-                        val image = xObject.image ?: continue
-                        val currentDpi = xObject.metadata?.let { 72 } ?: 72
-
-                        // Scale down if needed
-                        val scaleFactor = if (currentDpi > targetDpi) {
-                            targetDpi.toFloat() / currentDpi.toFloat()
-                        } else 1f
-
-                        val targetWidth = (image.width * scaleFactor).toInt().coerceAtLeast(1)
-                        val targetHeight = (image.height * scaleFactor).toInt().coerceAtLeast(1)
-
-                        val scaledBitmap = if (scaleFactor < 1f) {
-                            Bitmap.createScaledBitmap(image, targetWidth, targetHeight, true)
-                        } else {
-                            image
-                        }
-
-                        val newImage = JPEGFactory.createFromImage(document, scaledBitmap, quality / 100f)
-                        resources.put(name, newImage)
-
-                        if (scaledBitmap !== image) {
-                            scaledBitmap.recycle()
-                        }
-                        image.recycle()
-                    } catch (_: Exception) {
-                        // Skip images that can't be compressed
-                    }
-                }
-            }
-        } catch (_: Exception) {
-            // Skip pages that error
-        }
+    private fun compressBitmapToJpeg(bitmap: Bitmap, quality: Int): Bitmap {
+        val baos = ByteArrayOutputStream()
+        bitmap.compress(Bitmap.CompressFormat.JPEG, quality, baos)
+        val bytes = baos.toByteArray()
+        return android.graphics.BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
+            ?: bitmap
     }
 
     fun estimateCompressedSize(originalSize: Long, level: PdfCompressionLevel): Long {

@@ -15,10 +15,10 @@ enum class PdfCompressionLevel(val displayName: String) {
         MAXIMUM -> 40
     }
 
-    fun getTargetDpi(): Int = when (this) {
-        LOW -> 150
-        BALANCED -> 100
-        MAXIMUM -> 72
+    fun getPageScale(): Float = when (this) {
+        LOW -> 1.0f
+        BALANCED -> 0.75f
+        MAXIMUM -> 0.55f
     }
 
     fun getEstimatedRatio(): Float = when (this) {

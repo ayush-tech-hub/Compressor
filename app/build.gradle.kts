@@ -80,9 +80,6 @@ dependencies {
     // Coroutines
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
 
-    // PDF compression (offline)
-    implementation("com.tom_roush:pdfbox-android:2.0.27.0")
-
     // EXIF
     implementation("androidx.exifinterface:exifinterface:1.3.7")
 
