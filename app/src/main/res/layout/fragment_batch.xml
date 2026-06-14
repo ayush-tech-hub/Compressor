@@ -5,64 +5,36 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:padding="16dp">
+    android:padding="@dimen/screen_padding">
 
-    <!-- Add File Buttons -->
+    <!-- Add buttons row -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:layout_marginBottom="12dp">
+        android:layout_marginBottom="@dimen/card_margin">
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/buttonAddImages"
+            style="@style/Widget.Material3.Button.OutlinedButton"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="@string/add_images"
             android:layout_marginEnd="8dp"
-            style="@style/Widget.Material3.Button.OutlinedButton" />
+            android:text="@string/add_images"
+            app:icon="@drawable/ic_image" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/buttonAddPdfs"
+            style="@style/Widget.Material3.Button.OutlinedButton"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:text="@string/add_pdfs"
-            android:layout_marginStart="8dp"
-            style="@style/Widget.Material3.Button.OutlinedButton" />
-
+            app:icon="@drawable/ic_pdf" />
     </LinearLayout>
 
-    <!-- Overall Progress -->
-    <ProgressBar
-        android:id="@+id/progressOverall"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:visibility="gone"
-        android:layout_marginBottom="4dp"
-        style="@style/Widget.AppCompat.ProgressBar.Horizontal"
-        android:max="100" />
-
-    <TextView
-        android:id="@+id/textBatchStatus"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:visibility="gone"
-        android:textSize="13sp"
-        android:textColor="?attr/colorOnSurfaceVariant"
-        android:layout_marginBottom="2dp" />
-
-    <TextView
-        android:id="@+id/textEta"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:visibility="gone"
-        android:textSize="12sp"
-        android:textColor="?attr/colorOnSurfaceVariant"
-        android:layout_marginBottom="8dp" />
-
-    <!-- Empty State -->
+    <!-- Empty state -->
     <TextView
         android:id="@+id/textEmptyBatch"
         android:layout_width="match_parent"
@@ -70,35 +42,58 @@
         android:layout_weight="1"
         android:gravity="center"
         android:text="@string/batch_empty_hint"
-        android:textColor="?attr/colorOnSurfaceVariant"
-        android:visibility="visible" />
+        android:textSize="14sp"
+        android:textColor="?android:textColorSecondary" />
 
-    <!-- File List -->
+    <!-- File list -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerBatch"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        android:visibility="gone"
-        android:clipToPadding="false"
-        android:paddingBottom="8dp" />
+        android:visibility="gone" />
 
-    <!-- Action Buttons -->
+    <!-- Overall progress -->
+    <ProgressBar
+        android:id="@+id/progressOverall"
+        style="@style/Widget.AppCompat.ProgressBar.Horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:max="100"
+        android:visibility="gone" />
+
+    <!-- Status / ETA -->
+    <TextView
+        android:id="@+id/textBatchStatus"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:textSize="13sp"
+        android:visibility="gone" />
+
+    <TextView
+        android:id="@+id/textEta"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="13sp"
+        android:visibility="gone" />
+
+    <!-- Buttons row -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:layout_marginTop="8dp">
+        android:layout_marginTop="12dp">
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/buttonClearAll"
+            style="@style/Widget.Material3.Button.OutlinedButton"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="@string/clear_all"
             android:layout_marginEnd="8dp"
-            android:enabled="false"
-            style="@style/Widget.Material3.Button.OutlinedButton" />
+            android:text="@string/clear_all" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/buttonStartCompression"
@@ -106,8 +101,8 @@
             android:layout_height="wrap_content"
             android:layout_weight="2"
             android:text="@string/start_compression"
-            android:enabled="false" />
-
+            android:enabled="false"
+            app:icon="@drawable/ic_compress" />
     </LinearLayout>
 
 </LinearLayout>

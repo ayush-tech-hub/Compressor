@@ -3,21 +3,21 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:fillViewport="true">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="16dp">
+        android:padding="@dimen/screen_padding">
 
-        <!-- Preview -->
+        <!-- Image Preview -->
         <FrameLayout
             android:layout_width="match_parent"
             android:layout_height="200dp"
-            android:layout_marginBottom="16dp"
-            android:background="?attr/colorSurfaceVariant"
-            android:contentDescription="@string/image_preview">
+            android:layout_marginBottom="@dimen/card_margin"
+            android:background="?attr/colorSurfaceVariant">
 
             <ImageView
                 android:id="@+id/imagePreview"
@@ -33,8 +33,8 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:text="@string/select_image_hint"
-                android:textColor="?attr/colorOnSurfaceVariant" />
-
+                android:textSize="14sp"
+                android:textColor="?android:textColorSecondary" />
         </FrameLayout>
 
         <!-- Select Button -->
@@ -42,14 +42,14 @@
             android:id="@+id/buttonSelectImage"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/select_image"
-            android:layout_marginBottom="16dp" />
+            android:layout_marginBottom="@dimen/card_margin"
+            android:text="@string/select_image" />
 
         <!-- Quality Selector -->
         <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
+            android:layout_marginBottom="@dimen/card_margin"
             app:cardCornerRadius="12dp"
             app:cardElevation="2dp">
 
@@ -62,41 +62,44 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/quality"
+                    android:text="@string/quality_label"
+                    android:textSize="15sp"
                     android:textStyle="bold"
-                    android:textSize="16sp"
                     android:layout_marginBottom="8dp" />
 
                 <RadioGroup
                     android:id="@+id/radioGroupQuality"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical">
+                    android:orientation="horizontal">
 
                     <RadioButton
                         android:id="@+id/radioLow"
-                        android:layout_width="match_parent"
+                        android:layout_width="0dp"
                         android:layout_height="wrap_content"
+                        android:layout_weight="1"
                         android:text="@string/quality_low" />
 
                     <RadioButton
                         android:id="@+id/radioMedium"
-                        android:layout_width="match_parent"
+                        android:layout_width="0dp"
                         android:layout_height="wrap_content"
+                        android:layout_weight="1"
                         android:text="@string/quality_medium" />
 
                     <RadioButton
                         android:id="@+id/radioHigh"
-                        android:layout_width="match_parent"
+                        android:layout_width="0dp"
                         android:layout_height="wrap_content"
+                        android:layout_weight="1"
                         android:text="@string/quality_high" />
 
                     <RadioButton
                         android:id="@+id/radioCustom"
-                        android:layout_width="match_parent"
+                        android:layout_width="0dp"
                         android:layout_height="wrap_content"
+                        android:layout_weight="1"
                         android:text="@string/quality_custom" />
-
                 </RadioGroup>
 
                 <SeekBar
@@ -112,19 +115,20 @@
                     android:id="@+id/textQualityValue"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="4dp"
-                    android:visibility="gone" />
+                    android:text="@string/quality_value_default"
+                    android:textSize="13sp"
+                    android:visibility="gone"
+                    android:layout_marginTop="4dp" />
 
             </LinearLayout>
-
         </com.google.android.material.card.MaterialCardView>
 
-        <!-- File Info -->
+        <!-- File Info Card -->
         <com.google.android.material.card.MaterialCardView
             android:id="@+id/cardFileInfo"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
+            android:layout_marginBottom="@dimen/card_margin"
             android:visibility="gone"
             app:cardCornerRadius="12dp"
             app:cardElevation="2dp">
@@ -139,26 +143,27 @@
                     android:id="@+id/textOriginalSize"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:textSize="14sp" />
+                    android:textSize="14sp"
+                    android:layout_marginBottom="4dp"
+                    tools:text="Original: 2.5 MB" />
 
                 <TextView
                     android:id="@+id/textEstimatedSize"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:textSize="14sp"
-                    android:layout_marginTop="4dp" />
+                    android:layout_marginBottom="4dp"
+                    tools:text="Estimated: 1.2 MB" />
 
                 <TextView
                     android:id="@+id/textSavingsPercent"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:textSize="14sp"
-                    android:textStyle="bold"
                     android:textColor="?attr/colorPrimary"
-                    android:layout_marginTop="4dp" />
+                    tools:text="Savings: ~52%" />
 
             </LinearLayout>
-
         </com.google.android.material.card.MaterialCardView>
 
         <!-- Progress -->
@@ -166,10 +171,8 @@
             android:id="@+id/progressCompressing"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:visibility="gone"
-            android:layout_marginBottom="8dp"
-            style="@style/Widget.AppCompat.ProgressBar.Horizontal"
-            android:indeterminate="true" />
+            android:layout_marginBottom="@dimen/card_margin"
+            android:visibility="gone" />
 
         <!-- Compress Button -->
         <com.google.android.material.button.MaterialButton
@@ -178,9 +181,10 @@
             android:layout_height="wrap_content"
             android:text="@string/compress_and_save"
             android:enabled="false"
-            android:layout_marginBottom="16dp" />
+            android:layout_marginBottom="@dimen/card_margin"
+            app:icon="@drawable/ic_compress" />
 
-        <!-- Result Section -->
+        <!-- Result Group -->
         <LinearLayout
             android:id="@+id/groupResult"
             android:layout_width="match_parent"
@@ -191,11 +195,10 @@
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="12dp"
+                android:layout_marginBottom="@dimen/card_margin"
                 app:cardCornerRadius="12dp"
                 app:cardElevation="2dp"
-                app:strokeColor="?attr/colorPrimary"
-                app:strokeWidth="1dp">
+                app:cardBackgroundColor="?attr/colorSurfaceVariant">
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -207,74 +210,73 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="@string/compression_complete"
+                        android:textSize="15sp"
                         android:textStyle="bold"
-                        android:textSize="16sp"
                         android:layout_marginBottom="8dp" />
 
                     <TextView
                         android:id="@+id/textResultOriginal"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:textSize="14sp" />
+                        android:textSize="14sp"
+                        android:layout_marginBottom="4dp" />
 
                     <TextView
                         android:id="@+id/textResultCompressed"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:textSize="14sp"
-                        android:layout_marginTop="4dp" />
+                        android:layout_marginBottom="4dp" />
 
                     <TextView
                         android:id="@+id/textResultSaved"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:textSize="14sp"
-                        android:textStyle="bold"
-                        android:textColor="?attr/colorPrimary"
-                        android:layout_marginTop="4dp" />
+                        android:textColor="?attr/colorPrimary" />
 
                 </LinearLayout>
-
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- Action Buttons -->
+            <!-- Action buttons -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal">
+                android:orientation="horizontal"
+                android:gravity="center">
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/buttonShare"
+                    style="@style/Widget.Material3.Button.OutlinedButton"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="@string/share"
                     android:layout_marginEnd="4dp"
-                    style="@style/Widget.Material3.Button.OutlinedButton" />
+                    android:text="@string/share"
+                    app:icon="@drawable/ic_share" />
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/buttonOpen"
+                    style="@style/Widget.Material3.Button.OutlinedButton"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="@string/open"
-                    android:layout_marginHorizontal="4dp"
-                    style="@style/Widget.Material3.Button.OutlinedButton" />
+                    android:layout_marginStart="4dp"
+                    android:layout_marginEnd="4dp"
+                    android:text="@string/open" />
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/buttonDelete"
+                    style="@style/Widget.Material3.Button.OutlinedButton"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="@string/delete"
                     android:layout_marginStart="4dp"
-                    style="@style/Widget.Material3.Button.OutlinedButton"
-                    app:strokeColor="@color/colorError" />
+                    android:text="@string/delete"
+                    app:icon="@drawable/ic_delete" />
 
             </LinearLayout>
-
         </LinearLayout>
 
     </LinearLayout>
-
 </ScrollView>
