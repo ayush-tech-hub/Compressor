@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">CompressX</string>
+    <string name="home_subtitle">Compress images and PDFs offline</string>
+
+    <!-- Home -->
+    <string name="compress_images">Compress Images</string>
+    <string name="compress_images_desc">JPEG, PNG, WebP — reduce file size</string>
+    <string name="compress_pdfs">Compress PDFs</string>
+    <string name="compress_pdfs_desc">Reduce PDF file size offline</string>
+    <string name="stats_title">Your Stats</string>
+    <string name="stat_total_compressed">%d files compressed</string>
+    <string name="stat_total_compressed_default">0 files compressed</string>
+    <string name="stat_space_saved">%s saved</string>
+    <string name="stat_space_saved_default">0 B saved</string>
+
+    <!-- Image Compress -->
+    <string name="select_image">Select Image</string>
+    <string name="select_image_hint">Tap below to select an image</string>
+    <string name="image_preview">Image preview</string>
+    <string name="quality_label">Quality</string>
+    <string name="quality_low">Low</string>
+    <string name="quality_medium">Medium</string>
+    <string name="quality_high">High</string>
+    <string name="quality_custom">Custom</string>
+    <string name="quality_value">Quality: %d%%</string>
+    <string name="quality_value_default">Quality: 60%</string>
+    <string name="original_size">Original: %s</string>
+    <string name="estimated_size">Estimated: %s</string>
+    <string name="savings_percent">Savings: ~%d%%</string>
+    <string name="compress_and_save">Compress &amp; Save</string>
+    <string name="compression_complete">Compression Complete!</string>
+    <string name="result_original">Original: %s</string>
+    <string name="result_compressed">Compressed: %s</string>
+    <string name="result_saved">Saved: %s%%</string>
+    <string name="quality">Quality</string>
+    <string name="pdf_icon">PDF document</string>
+    <string name="compression_level">Compression Level</string>
+    <string name="pdf_level_low">Low (higher quality, larger file)</string>
+    <string name="pdf_level_balanced">Balanced (recommended)</string>
+    <string name="pdf_level_maximum">Maximum (smallest file)</string>
+    <string name="compression_history">Compression History</string>
+    <string name="nav_compress_image">Compress Image</string>
+    <string name="nav_compress_pdf">Compress PDF</string>
+    <string name="share">Share</string>
+    <string name="open">Open</string>
+    <string name="delete">Delete</string>
+    <string name="share_via">Share via</string>
+    <string name="no_app_to_open">No app found to open this file</string>
+    <string name="file_deleted">File deleted</string>
+
+    <!-- PDF Compress -->
+    <string name="select_pdf">Select PDF</string>
+    <string name="pdf_file">PDF file</string>
+    <string name="no_pdf_selected">Tap below to select a PDF</string>
+    <string name="compression_level_label">Compression Level</string>
+    <string name="level_low">Low</string>
+    <string name="level_balanced">Balanced</string>
+    <string name="level_maximum">Maximum</string>
+
+    <!-- Batch -->
+    <string name="add_images">Add Images</string>
+    <string name="add_pdfs">Add PDFs</string>
+    <string name="batch_empty_hint">Add images or PDFs to compress</string>
+    <string name="start_compression">Start Compression</string>
+    <string name="clear_all">Clear All</string>
+    <string name="status_pending">Pending</string>
+    <string name="status_compressing">Compressing</string>
+    <string name="status_done">Done</string>
+    <string name="status_failed">Failed</string>
+    <string name="file_type_icon">File type</string>
+    <string name="remove_file">Remove file</string>
+
+    <!-- History -->
+    <string name="history_title">History</string>
+    <string name="history_empty">No compression history yet</string>
+    <string name="history_sizes">%s → %s (%s%% saved)</string>
+    <string name="clear_history">Clear History</string>
+    <string name="clear_history_confirm">Delete all compression history?</string>
+    <string name="clear">Clear</string>
+    <string name="cancel">Cancel</string>
+    <string name="delete_entry">Delete Entry</string>
+    <string name="delete_entry_confirm">Remove this entry from history?</string>
+    <string name="file_not_found">File not found or cannot be opened</string>
+
+    <!-- Navigation labels -->
+    <string name="nav_home">Home</string>
+    <string name="nav_batch">Batch</string>
+    <string name="nav_history">History</string>
+</resources>

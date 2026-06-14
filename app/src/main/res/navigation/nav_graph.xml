@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/homeFragment">
+
+    <fragment
+        android:id="@+id/homeFragment"
+        android:name="com.compressx.app.ui.home.HomeFragment"
+        android:label="@string/nav_home"
+        tools:layout="@layout/fragment_home">
+        <action
+            android:id="@+id/action_homeFragment_to_imageCompressFragment"
+            app:destination="@id/imageCompressFragment" />
+        <action
+            android:id="@+id/action_homeFragment_to_pdfCompressFragment"
+            app:destination="@id/pdfCompressFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/imageCompressFragment"
+        android:name="com.compressx.app.ui.image.ImageCompressFragment"
+        android:label="@string/compress_images"
+        tools:layout="@layout/fragment_image_compress" />
+
+    <fragment
+        android:id="@+id/pdfCompressFragment"
+        android:name="com.compressx.app.ui.pdf.PdfCompressFragment"
+        android:label="@string/compress_pdfs"
+        tools:layout="@layout/fragment_pdf_compress" />
+
+    <fragment
+        android:id="@+id/batchFragment"
+        android:name="com.compressx.app.ui.batch.BatchFragment"
+        android:label="@string/nav_batch"
+        tools:layout="@layout/fragment_batch" />
+
+    <fragment
+        android:id="@+id/historyFragment"
+        android:name="com.compressx.app.ui.history.HistoryFragment"
+        android:label="@string/nav_history"
+        tools:layout="@layout/fragment_history" />
+
+</navigation>
