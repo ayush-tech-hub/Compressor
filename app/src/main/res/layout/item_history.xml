@@ -2,60 +2,71 @@
 <com.google.android.material.card.MaterialCardView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginBottom="8dp"
-    android:clickable="true"
-    android:focusable="true"
+    android:layout_marginHorizontal="4dp"
+    android:layout_marginVertical="4dp"
     app:cardCornerRadius="8dp"
-    app:cardElevation="2dp">
+    app:cardElevation="1dp"
+    android:clickable="true"
+    android:focusable="true">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:padding="12dp"
-        android:gravity="center_vertical">
+        android:gravity="center_vertical"
+        android:padding="12dp">
 
         <ImageView
             android:id="@+id/imageHistoryType"
             android:layout_width="36dp"
             android:layout_height="36dp"
-            android:layout_marginEnd="12dp"
-            android:contentDescription="@string/file_type_icon" />
+            android:contentDescription="@string/file_type_icon"
+            tools:src="@drawable/ic_image" />
 
         <LinearLayout
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:orientation="vertical">
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:layout_marginStart="12dp">
 
             <TextView
                 android:id="@+id/textHistoryFileName"
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textStyle="bold"
                 android:textSize="14sp"
+                android:textStyle="bold"
                 android:maxLines="1"
-                android:ellipsize="end" />
+                android:ellipsize="middle"
+                tools:text="photo_compressed.jpg" />
 
             <TextView
                 android:id="@+id/textHistorySizes"
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textSize="12sp"
-                android:textColor="?attr/colorOnSurfaceVariant"
-                android:layout_marginTop="2dp" />
+                android:textColor="?android:textColorSecondary"
+                android:layout_marginTop="2dp"
+                tools:text="Original: 2.5 MB → Compressed: 1.1 MB (56% saved)" />
 
             <TextView
                 android:id="@+id/textHistoryDate"
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textSize="11sp"
-                android:textColor="?attr/colorOnSurfaceVariant"
-                android:layout_marginTop="2dp" />
-
+                android:textColor="?android:textColorSecondary"
+                android:layout_marginTop="2dp"
+                tools:text="Dec 25, 2024 14:30" />
         </LinearLayout>
 
-    </LinearLayout>
+        <ImageView
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:src="@android:drawable/ic_media_play"
+            app:tint="?android:textColorSecondary" />
 
+    </LinearLayout>
 </com.google.android.material.card.MaterialCardView>
