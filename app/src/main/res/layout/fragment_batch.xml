@@ -105,4 +105,13 @@
             app:icon="@drawable/ic_compress" />
     </LinearLayout>
 
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/buttonShareAll"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="@string/share_all_completed"
+        android:visibility="gone"
+        app:icon="@drawable/ic_share" />
+
 </LinearLayout>

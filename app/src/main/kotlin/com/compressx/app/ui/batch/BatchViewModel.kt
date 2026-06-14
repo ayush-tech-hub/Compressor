@@ -37,8 +37,17 @@ class BatchViewModel(application: Application) : AndroidViewModel(application) {
     private val _etaText = MutableLiveData<String>("")
     val etaText: LiveData<String> = _etaText
 
+    private val _allDone = MutableLiveData(false)
+    val allDone: LiveData<Boolean> = _allDone
+
+    private val outputUriMap = mutableMapOf<String, android.net.Uri>()
     private var startTime = 0L
     private val workObservers = mutableMapOf<androidx.lifecycle.LiveData<WorkInfo>, Observer<WorkInfo>>()
+
+    fun getCompletedOutputUris(): List<android.net.Uri> {
+        val items = _fileItems.value ?: return emptyList()
+        return items.filter { it.status == CompressionStatus.DONE }.mapNotNull { outputUriMap[it.id] }
+    }
 
     fun addImages(uris: List<Uri>) {
         viewModelScope.launch(Dispatchers.IO) {
@@ -91,7 +100,9 @@ class BatchViewModel(application: Application) : AndroidViewModel(application) {
         if (items.isEmpty()) return
 
         _isRunning.value = true
+        _allDone.value = false
         startTime = System.currentTimeMillis()
+        outputUriMap.clear()
 
         // Reset all to pending
         items.forEach { it.status = CompressionStatus.PENDING; it.progress = 0 }
@@ -104,6 +115,7 @@ class BatchViewModel(application: Application) : AndroidViewModel(application) {
             val outputFile = java.io.File(cacheDir, FileUtils.buildCompressedFileName(item.name))
             val outputUri = Uri.fromFile(outputFile)
 
+            outputUriMap[item.id] = outputUri
             when (item.type) {
                 FileType.IMAGE -> {
                     OneTimeWorkRequestBuilder<ImageCompressionWorker>()
@@ -197,6 +209,7 @@ class BatchViewModel(application: Application) : AndroidViewModel(application) {
         val allDone = items.all { it.status == CompressionStatus.DONE || it.status == CompressionStatus.FAILED }
         if (allDone) {
             _isRunning.postValue(false)
+            _allDone.postValue(true)
             val successCount = items.count { it.status == CompressionStatus.DONE }
             _statusText.postValue("Done: $successCount/${total} succeeded")
             _etaText.postValue("")
@@ -218,5 +231,7 @@ class BatchViewModel(application: Application) : AndroidViewModel(application) {
         _overallProgress.value = 0
         _statusText.value = ""
         _etaText.value = ""
+        _allDone.value = false
+        outputUriMap.clear()
     }
 }

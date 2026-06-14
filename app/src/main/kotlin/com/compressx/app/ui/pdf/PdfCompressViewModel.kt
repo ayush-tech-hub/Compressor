@@ -10,6 +10,8 @@ import com.compressx.app.data.db.CompressionHistory
 import com.compressx.app.data.repository.CompressionRepository
 import com.compressx.app.model.CompressionResult
 import com.compressx.app.model.PdfCompressionLevel
+import com.compressx.app.model.PdfCompressionSettings
+import com.compressx.app.model.PdfTargetDpi
 import com.compressx.app.util.FileUtils
 import com.compressx.app.util.PdfCompressor
 import kotlinx.coroutines.launch
@@ -33,6 +35,13 @@ class PdfCompressViewModel(application: Application) : AndroidViewModel(applicat
     private val _compressionLevel = MutableLiveData(PdfCompressionLevel.BALANCED)
     val compressionLevel: LiveData<PdfCompressionLevel> = _compressionLevel
 
+    // Custom mode
+    private val _isCustomMode = MutableLiveData(false)
+    val isCustomMode: LiveData<Boolean> = _isCustomMode
+
+    private val _customSettings = MutableLiveData(PdfCompressionSettings())
+    val customSettings: LiveData<PdfCompressionSettings> = _customSettings
+
     private val _compressionResult = MutableLiveData<CompressionResult?>()
     val compressionResult: LiveData<CompressionResult?> = _compressionResult
 
@@ -50,36 +59,69 @@ class PdfCompressViewModel(application: Application) : AndroidViewModel(applicat
             val size = FileUtils.getFileSize(getApplication(), uri)
             _fileName.postValue(name)
             _originalSize.postValue(size)
-            updateEstimate(size, _compressionLevel.value ?: PdfCompressionLevel.BALANCED)
+            refreshEstimate(size)
         }
     }
 
     fun setCompressionLevel(level: PdfCompressionLevel) {
         _compressionLevel.value = level
-        val size = _originalSize.value ?: 0L
-        if (size > 0L) updateEstimate(size, level)
+        refreshEstimate(_originalSize.value ?: 0L)
     }
 
-    private fun updateEstimate(originalSize: Long, level: PdfCompressionLevel) {
-        val estimated = PdfCompressor.estimateCompressedSize(originalSize, level)
+    fun setCustomMode(enabled: Boolean) {
+        _isCustomMode.value = enabled
+        refreshEstimate(_originalSize.value ?: 0L)
+    }
+
+    fun setImageQuality(quality: Int) {
+        _customSettings.value = _customSettings.value!!.copy(imageQuality = quality.coerceIn(10, 100))
+        refreshEstimate(_originalSize.value ?: 0L)
+    }
+
+    fun setTargetDpi(dpi: PdfTargetDpi) {
+        _customSettings.value = _customSettings.value!!.copy(scaleFactor = dpi.scale())
+        refreshEstimate(_originalSize.value ?: 0L)
+    }
+
+    fun setTargetFileSize(bytes: Long?) {
+        _customSettings.value = _customSettings.value!!.copy(targetFileSizeBytes = bytes)
+    }
+
+    fun setRemoveMetadata(remove: Boolean) {
+        _customSettings.value = _customSettings.value!!.copy(removeMetadata = remove)
+    }
+
+    private fun refreshEstimate(size: Long) {
+        if (size <= 0L) return
+        val estimated = if (_isCustomMode.value == true) {
+            PdfCompressor.estimateCompressedSize(size, _customSettings.value ?: PdfCompressionSettings())
+        } else {
+            PdfCompressor.estimateCompressedSize(size, _compressionLevel.value ?: PdfCompressionLevel.BALANCED)
+        }
         _estimatedSize.postValue(estimated)
     }
 
     fun compress(outputUri: Uri) {
         val inputUri = _selectedUri.value ?: return
-        val level = _compressionLevel.value ?: PdfCompressionLevel.BALANCED
-
         viewModelScope.launch {
             _isCompressing.value = true
             try {
-                val result = PdfCompressor.compress(
-                    context = getApplication(),
-                    inputUri = inputUri,
-                    compressionLevel = level,
-                    outputUri = outputUri
-                )
+                val result = if (_isCustomMode.value == true) {
+                    PdfCompressor.compress(
+                        context = getApplication(),
+                        inputUri = inputUri,
+                        settings = _customSettings.value ?: PdfCompressionSettings(),
+                        outputUri = outputUri
+                    )
+                } else {
+                    PdfCompressor.compress(
+                        context = getApplication(),
+                        inputUri = inputUri,
+                        compressionLevel = _compressionLevel.value ?: PdfCompressionLevel.BALANCED,
+                        outputUri = outputUri
+                    )
+                }
                 _compressionResult.value = result
-
                 if (result.success) {
                     repository.insert(
                         CompressionHistory(

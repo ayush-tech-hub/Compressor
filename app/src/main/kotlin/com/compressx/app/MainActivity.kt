@@ -1,6 +1,7 @@
 package com.compressx.app
 
 import android.Manifest
+import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
@@ -21,7 +22,7 @@ class MainActivity : AppCompatActivity() {
 
     private val permissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
-    ) { /* permissions handled silently — SAF doesn't need them but some OEMs do */ }
+    ) { /* SAF file-picking doesn't need these, but some OEM ROMs check them */ }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -35,31 +36,40 @@ class MainActivity : AppCompatActivity() {
         navController = navHostFragment.navController
 
         val appBarConfiguration = AppBarConfiguration(
-            setOf(R.id.homeFragment, R.id.batchFragment, R.id.historyFragment)
+            setOf(
+                R.id.homeFragment,
+                R.id.batchFragment,
+                R.id.historyFragment,
+                R.id.settingsFragment
+            )
         )
         setupActionBarWithNavController(navController, appBarConfiguration)
         binding.bottomNavigation.setupWithNavController(navController)
+
+        // Skip welcome screen for returning users
+        if (savedInstanceState == null) {
+            val shown = getSharedPreferences("prefs_compressx", Context.MODE_PRIVATE)
+                .getBoolean("welcome_shown", false)
+            if (shown) {
+                navController.navigate(R.id.action_welcomeFragment_to_homeFragment)
+            }
+        }
 
         requestStoragePermissions()
     }
 
     private fun requestStoragePermissions() {
-        val permissions = buildList {
+        val needed = buildList {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                 add(Manifest.permission.READ_MEDIA_IMAGES)
+                add(Manifest.permission.POST_NOTIFICATIONS)
             } else {
                 add(Manifest.permission.READ_EXTERNAL_STORAGE)
             }
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                add(Manifest.permission.POST_NOTIFICATIONS)
-            }
-        }
-        val needed = permissions.filter {
+        }.filter {
             ContextCompat.checkSelfPermission(this, it) != PackageManager.PERMISSION_GRANTED
         }
-        if (needed.isNotEmpty()) {
-            permissionLauncher.launch(needed.toTypedArray())
-        }
+        if (needed.isNotEmpty()) permissionLauncher.launch(needed.toTypedArray())
     }
 
     override fun onSupportNavigateUp(): Boolean {

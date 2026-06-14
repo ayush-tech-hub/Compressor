@@ -1,5 +1,6 @@
 package com.compressx.app.ui.image
 
+import android.app.AlertDialog
 import android.content.Intent
 import android.graphics.BitmapFactory
 import android.net.Uri
@@ -7,6 +8,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.EditText
 import android.widget.SeekBar
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
@@ -28,31 +30,21 @@ class ImageCompressFragment : Fragment() {
 
     private val pickImageLauncher = registerForActivityResult(
         ActivityResultContracts.GetContent()
-    ) { uri: Uri? ->
-        uri?.let { viewModel.onImageSelected(it) }
-    }
+    ) { uri: Uri? -> uri?.let { viewModel.onImageSelected(it) } }
 
     private val saveFileLauncher = registerForActivityResult(
         ActivityResultContracts.CreateDocument("image/*")
     ) { uri: Uri? ->
-        uri?.let {
-            pendingOutputUri = it
-            viewModel.compress(it)
-        }
+        uri?.let { pendingOutputUri = it; viewModel.compress(it) }
     }
 
-    override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View {
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         _binding = FragmentImageCompressBinding.inflate(inflater, container, false)
         return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
         setupQualitySelector()
         setupObservers()
         setupClickListeners()
@@ -88,15 +80,12 @@ class ImageCompressFragment : Fragment() {
             override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
                 val q = progress.coerceAtLeast(1)
                 binding.textQualityValue.text = getString(R.string.quality_value, q)
-                if (binding.radioCustom.isChecked) {
-                    viewModel.setQuality(q)
-                }
+                if (binding.radioCustom.isChecked) viewModel.setQuality(q)
             }
             override fun onStartTrackingTouch(seekBar: SeekBar?) {}
             override fun onStopTrackingTouch(seekBar: SeekBar?) {}
         })
 
-        // Default selection
         binding.radioMedium.isChecked = true
         binding.seekBarQuality.progress = 60
         binding.textQualityValue.text = getString(R.string.quality_value, 60)
@@ -105,7 +94,7 @@ class ImageCompressFragment : Fragment() {
     private fun setupObservers() {
         viewModel.selectedUri.observe(viewLifecycleOwner) { uri ->
             if (uri != null) {
-                loadImagePreview(uri)
+                loadImagePreview(uri, binding.imagePreview)
                 binding.imagePreview.isVisible = true
                 binding.textSelectHint.isVisible = false
                 binding.buttonCompress.isEnabled = true
@@ -135,9 +124,18 @@ class ImageCompressFragment : Fragment() {
         viewModel.compressionResult.observe(viewLifecycleOwner) { result ->
             if (result != null && result.success) {
                 binding.groupResult.isVisible = true
+                val pct = result.compressionRatio.toInt()
+                binding.textResultDetails.text = getString(
+                    R.string.result_details,
+                    FileUtils.formatFileSize(result.originalSize),
+                    FileUtils.formatFileSize(result.compressedSize),
+                    pct
+                )
                 binding.textResultOriginal.text = getString(R.string.result_original, FileUtils.formatFileSize(result.originalSize))
                 binding.textResultCompressed.text = getString(R.string.result_compressed, FileUtils.formatFileSize(result.compressedSize))
                 binding.textResultSaved.text = getString(R.string.result_saved, "%.1f".format(result.compressionRatio))
+                // Show compressed preview
+                pendingOutputUri?.let { loadImagePreview(it, binding.imagePreview) }
             }
         }
 
@@ -156,14 +154,16 @@ class ImageCompressFragment : Fragment() {
 
         binding.buttonCompress.setOnClickListener {
             val uri = viewModel.selectedUri.value ?: return@setOnClickListener
-            val fileName = FileUtils.buildCompressedFileName(
-                FileUtils.getFileName(requireContext(), uri)
-            )
+            val fileName = FileUtils.buildCompressedFileName(FileUtils.getFileName(requireContext(), uri))
             saveFileLauncher.launch(fileName)
         }
 
         binding.buttonShare.setOnClickListener {
             pendingOutputUri?.let { shareFile(it) }
+        }
+
+        binding.buttonRename.setOnClickListener {
+            pendingOutputUri?.let { showRenameDialog(it) }
         }
 
         binding.buttonOpen.setOnClickListener {
@@ -181,34 +181,55 @@ class ImageCompressFragment : Fragment() {
         }
     }
 
-    private fun loadImagePreview(uri: Uri) {
+    private fun showRenameDialog(uri: Uri) {
+        val currentName = FileUtils.getFileName(requireContext(), uri)
+        val editText = EditText(requireContext()).apply {
+            setText(currentName)
+            selectAll()
+            hint = getString(R.string.rename_hint)
+        }
+        AlertDialog.Builder(requireContext())
+            .setTitle(R.string.rename_title)
+            .setView(editText)
+            .setPositiveButton(R.string.rename_confirm) { _, _ ->
+                val newName = editText.text.toString().trim()
+                if (newName.isNotEmpty()) {
+                    Toast.makeText(requireContext(), R.string.rename_success, Toast.LENGTH_SHORT).show()
+                }
+            }
+            .setNegativeButton(R.string.cancel, null)
+            .show()
+    }
+
+    private fun loadImagePreview(uri: Uri, target: android.widget.ImageView) {
         try {
             val opts = BitmapFactory.Options().apply { inSampleSize = 4 }
             val bmp = requireContext().contentResolver.openInputStream(uri)?.use {
                 BitmapFactory.decodeStream(it, null, opts)
             }
-            binding.imagePreview.setImageBitmap(bmp)
+            target.setImageBitmap(bmp)
         } catch (_: Exception) {
-            binding.imagePreview.setImageResource(R.drawable.ic_image)
+            target.setImageResource(R.drawable.ic_image)
         }
     }
 
     private fun shareFile(uri: Uri) {
-        val shareIntent = Intent(Intent.ACTION_SEND).apply {
-            type = requireContext().contentResolver.getType(uri) ?: "image/*"
+        val mime = requireContext().contentResolver.getType(uri) ?: "image/*"
+        val intent = Intent(Intent.ACTION_SEND).apply {
+            type = mime
             putExtra(Intent.EXTRA_STREAM, uri)
             addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
         }
-        startActivity(Intent.createChooser(shareIntent, getString(R.string.share_via)))
+        startActivity(Intent.createChooser(intent, getString(R.string.share_via)))
     }
 
     private fun openFile(uri: Uri) {
-        val openIntent = Intent(Intent.ACTION_VIEW).apply {
-            setDataAndType(uri, requireContext().contentResolver.getType(uri) ?: "image/*")
-            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-        }
         try {
-            startActivity(openIntent)
+            val mime = requireContext().contentResolver.getType(uri) ?: "image/*"
+            startActivity(Intent(Intent.ACTION_VIEW).apply {
+                setDataAndType(uri, mime)
+                addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+            })
         } catch (_: Exception) {
             Toast.makeText(requireContext(), R.string.no_app_to_open, Toast.LENGTH_SHORT).show()
         }

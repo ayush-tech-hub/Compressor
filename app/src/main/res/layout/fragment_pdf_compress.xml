@@ -144,6 +144,172 @@
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
+        <!-- Custom Compression Toggle -->
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="@dimen/card_margin"
+            app:cardCornerRadius="12dp"
+            app:cardElevation="2dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <com.google.android.material.materialswitch.MaterialSwitch
+                    android:id="@+id/switchCustomMode"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/use_custom_mode"
+                    android:textSize="15sp" />
+
+                <!-- Custom controls (shown when switch is ON) -->
+                <LinearLayout
+                    android:id="@+id/layoutCustomControls"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:visibility="gone"
+                    android:layout_marginTop="12dp">
+
+                    <!-- Image Quality -->
+                    <TextView
+                        android:id="@+id/textPdfQualityValue"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/pdf_image_quality_label"
+                        android:textSize="14sp"
+                        android:layout_marginBottom="4dp" />
+
+                    <SeekBar
+                        android:id="@+id/seekBarPdfQuality"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:max="90"
+                        android:progress="50"
+                        android:layout_marginBottom="16dp" />
+
+                    <!-- DPI -->
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/pdf_dpi_label"
+                        android:textSize="14sp"
+                        android:textStyle="bold"
+                        android:layout_marginBottom="4dp" />
+
+                    <RadioGroup
+                        android:id="@+id/radioGroupDpi"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:layout_marginBottom="16dp">
+
+                        <RadioButton
+                            android:id="@+id/radioDpiOriginal"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:checked="true"
+                            android:text="@string/dpi_original" />
+
+                        <RadioButton
+                            android:id="@+id/radioDpi300"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="@string/dpi_300" />
+
+                        <RadioButton
+                            android:id="@+id/radioDpi150"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="@string/dpi_150" />
+
+                        <RadioButton
+                            android:id="@+id/radioDpi72"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="@string/dpi_72" />
+                    </RadioGroup>
+
+                    <!-- Target File Size -->
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/pdf_target_size_label"
+                        android:textSize="14sp"
+                        android:textStyle="bold"
+                        android:layout_marginBottom="8dp" />
+
+                    <com.google.android.material.chip.ChipGroup
+                        android:id="@+id/chipGroupTargetSize"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        app:singleSelection="true"
+                        android:layout_marginBottom="16dp">
+
+                        <com.google.android.material.chip.Chip
+                            android:id="@+id/chipNoLimit"
+                            style="@style/Widget.Material3.Chip.Filter"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:checked="true"
+                            android:text="@string/target_no_limit" />
+
+                        <com.google.android.material.chip.Chip
+                            android:id="@+id/chip10mb"
+                            style="@style/Widget.Material3.Chip.Filter"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/target_10mb" />
+
+                        <com.google.android.material.chip.Chip
+                            android:id="@+id/chip5mb"
+                            style="@style/Widget.Material3.Chip.Filter"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/target_5mb" />
+
+                        <com.google.android.material.chip.Chip
+                            android:id="@+id/chip1mb"
+                            style="@style/Widget.Material3.Chip.Filter"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/target_1mb" />
+
+                        <com.google.android.material.chip.Chip
+                            android:id="@+id/chip500kb"
+                            style="@style/Widget.Material3.Chip.Filter"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/target_500kb" />
+                    </com.google.android.material.chip.ChipGroup>
+
+                    <!-- Remove Metadata -->
+                    <com.google.android.material.materialswitch.MaterialSwitch
+                        android:id="@+id/switchRemoveMetadata"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:checked="true"
+                        android:text="@string/remove_metadata" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/remove_metadata_desc"
+                        android:textSize="12sp"
+                        android:textColor="?android:textColorSecondary"
+                        android:layout_marginTop="2dp" />
+
+                </LinearLayout>
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
         <!-- Progress -->
         <ProgressBar
             android:id="@+id/progressCompressing"
@@ -192,6 +358,16 @@
                         android:textStyle="bold"
                         android:layout_marginBottom="8dp" />
 
+                    <!-- Result summary line -->
+                    <TextView
+                        android:id="@+id/textResultDetails"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textSize="15sp"
+                        android:textStyle="bold"
+                        android:textColor="?attr/colorPrimary"
+                        android:layout_marginBottom="8dp" />
+
                     <TextView
                         android:id="@+id/textResultOriginal"
                         android:layout_width="wrap_content"
@@ -223,7 +399,6 @@
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/buttonShare"
-                    style="@style/Widget.Material3.Button.OutlinedButton"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
@@ -240,6 +415,17 @@
                     android:layout_marginStart="4dp"
                     android:layout_marginEnd="4dp"
                     android:text="@string/open" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/buttonRename"
+                    style="@style/Widget.Material3.Button.OutlinedButton"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_marginStart="4dp"
+                    android:layout_marginEnd="4dp"
+                    android:text="@string/rename"
+                    app:icon="@drawable/ic_edit" />
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/buttonDelete"

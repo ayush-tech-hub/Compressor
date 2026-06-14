@@ -1,10 +1,13 @@
 package com.compressx.app.ui.batch
 
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.content.FileProvider
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
@@ -52,6 +55,7 @@ class BatchFragment : Fragment() {
             binding.buttonStartCompression.isEnabled = items.isNotEmpty() && viewModel.isRunning.value != true
             binding.textEmptyBatch.isVisible = items.isEmpty()
             binding.recyclerBatch.isVisible = items.isNotEmpty()
+            if (items.isEmpty()) binding.buttonShareAll.isVisible = false
         }
 
         viewModel.overallProgress.observe(viewLifecycleOwner) { progress ->
@@ -74,6 +78,11 @@ class BatchFragment : Fragment() {
             binding.textEta.text = eta
             binding.textEta.isVisible = eta.isNotEmpty()
         }
+
+        viewModel.allDone.observe(viewLifecycleOwner) { done ->
+            val hasSucceeded = viewModel.getCompletedOutputUris().isNotEmpty()
+            binding.buttonShareAll.isVisible = done && hasSucceeded
+        }
     }
 
     private fun setupClickListeners() {
@@ -92,6 +101,45 @@ class BatchFragment : Fragment() {
         binding.buttonClearAll.setOnClickListener {
             viewModel.clearAll()
         }
+
+        binding.buttonShareAll.setOnClickListener {
+            shareAllCompleted()
+        }
+    }
+
+    private fun shareAllCompleted() {
+        val outputUris = viewModel.getCompletedOutputUris()
+        if (outputUris.isEmpty()) return
+
+        val contentUris = ArrayList<Uri>(outputUris.mapNotNull { fileUri ->
+            try {
+                if (fileUri.scheme == "file") {
+                    val file = java.io.File(fileUri.path ?: return@mapNotNull null)
+                    FileProvider.getUriForFile(requireContext(), "com.compressx.app.fileprovider", file)
+                } else {
+                    fileUri
+                }
+            } catch (_: Exception) {
+                null
+            }
+        })
+
+        if (contentUris.isEmpty()) return
+
+        val intent = if (contentUris.size == 1) {
+            Intent(Intent.ACTION_SEND).apply {
+                type = "*/*"
+                putExtra(Intent.EXTRA_STREAM, contentUris[0])
+                addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+            }
+        } else {
+            Intent(Intent.ACTION_SEND_MULTIPLE).apply {
+                type = "*/*"
+                putParcelableArrayListExtra(Intent.EXTRA_STREAM, contentUris)
+                addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+            }
+        }
+        startActivity(Intent.createChooser(intent, getString(R.string.share_via)))
     }
 
     override fun onDestroyView() {

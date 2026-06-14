@@ -87,4 +87,57 @@
     <string name="nav_home">Home</string>
     <string name="nav_batch">Batch</string>
     <string name="nav_history">History</string>
+    <string name="nav_settings">Settings</string>
+
+    <!-- Welcome Screen -->
+    <string name="welcome_headline">Your Privacy Comes First</string>
+    <string name="welcome_subtitle">CompressX works 100% offline — your files never leave your device.</string>
+    <string name="welcome_badge_offline">100% Offline Processing</string>
+    <string name="welcome_badge_offline_desc">No internet connection needed</string>
+    <string name="welcome_badge_ondevice">On-Device Compression</string>
+    <string name="welcome_badge_ondevice_desc">Files stay on your phone</string>
+    <string name="welcome_badge_nocollect">No Data Collection</string>
+    <string name="welcome_badge_nocollect_desc">Zero analytics or tracking</string>
+    <string name="welcome_badge_noserver">No Server Upload</string>
+    <string name="welcome_badge_noserver_desc">Your files are never transmitted</string>
+    <string name="welcome_privacy_bullets">✓  No internet connection required\n✓  No account or sign-in needed\n✓  No files uploaded to any server\n✓  No personal data collected\n✓  All processing happens locally\n✓  Your data remains under your control</string>
+    <string name="welcome_dont_show_again">Don\'t show again</string>
+    <string name="welcome_continue">Continue →</string>
+
+    <!-- Settings -->
+    <string name="settings_privacy_title">Privacy &amp; Security</string>
+    <string name="settings_privacy_body">🔒 This app does not upload any files to the internet.\n\n📵 No analytics, tracking, or crash reporting is enabled.\n\n📱 All compression happens entirely on your device.\n\n🚫 No personal data is collected or shared.\n\n✅ All processing uses Android\'s built-in APIs only.</string>
+    <string name="settings_about_title">About</string>
+    <string name="settings_app_name">CompressX</string>
+    <string name="settings_app_version">Version 1.0.0</string>
+    <string name="settings_show_welcome">Show Welcome Screen Again</string>
+    <string name="settings_footer">Made with ❤️ for privacy.</string>
+
+    <!-- PDF Custom Compression -->
+    <string name="custom_compression_label">Custom Compression</string>
+    <string name="use_custom_mode">Use Custom Mode</string>
+    <string name="pdf_image_quality_label">Image Quality: %d%%</string>
+    <string name="pdf_dpi_label">Embedded Image Resolution</string>
+    <string name="pdf_target_size_label">Target File Size</string>
+    <string name="target_no_limit">No Limit</string>
+    <string name="target_10mb">10 MB</string>
+    <string name="target_5mb">5 MB</string>
+    <string name="target_1mb">1 MB</string>
+    <string name="target_500kb">500 KB</string>
+    <string name="remove_metadata">Remove Metadata</string>
+    <string name="remove_metadata_desc">Strips author, GPS, and document info</string>
+    <string name="dpi_original">Original</string>
+    <string name="dpi_300">300 DPI</string>
+    <string name="dpi_150">150 DPI</string>
+    <string name="dpi_72">72 DPI</string>
+
+    <!-- Sharing and Renaming -->
+    <string name="rename_title">Rename File</string>
+    <string name="rename_hint">File name</string>
+    <string name="rename_confirm">Rename</string>
+    <string name="rename_success">File renamed</string>
+    <string name="share_all_completed">Share All Completed</string>
+    <string name="result_details">%1$s → %2$s (%3$d%% smaller)</string>
+    <string name="compressed_preview">Compressed preview</string>
+    <string name="rename">Rename</string>
 </resources>

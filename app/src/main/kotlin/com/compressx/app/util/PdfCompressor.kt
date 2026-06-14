@@ -11,6 +11,7 @@ import android.net.Uri
 import android.os.ParcelFileDescriptor
 import com.compressx.app.model.CompressionResult
 import com.compressx.app.model.PdfCompressionLevel
+import com.compressx.app.model.PdfCompressionSettings
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.ByteArrayOutputStream
@@ -107,7 +108,87 @@ object PdfCompressor {
             ?: bitmap
     }
 
+    // Overload for custom PdfCompressionSettings — supports target file size iteration
+    suspend fun compress(
+        context: Context,
+        inputUri: Uri,
+        settings: PdfCompressionSettings,
+        outputUri: Uri
+    ): CompressionResult = withContext(Dispatchers.IO) {
+        var inputTemp: File? = null
+        try {
+            val originalSize = FileUtils.getFileSize(context, inputUri)
+            inputTemp = FileUtils.copyUriToTempFile(context, inputUri, "pdf")
+                ?: return@withContext CompressionResult(
+                    success = false, originalSize = originalSize,
+                    compressedSize = 0, errorMessage = "Failed to read input PDF"
+                )
+
+            var currentQuality = settings.imageQuality
+            var result: CompressionResult
+
+            // Iterative compression when target size is set
+            do {
+                result = renderAndCompress(context, inputTemp, settings.copy(imageQuality = currentQuality), outputUri, originalSize)
+                if (settings.targetFileSizeBytes == null || !result.success) break
+                if (result.compressedSize <= settings.targetFileSizeBytes) break
+                currentQuality -= 10
+            } while (currentQuality >= 10)
+
+            result
+        } catch (e: Exception) {
+            CompressionResult(success = false, originalSize = FileUtils.getFileSize(context, inputUri),
+                compressedSize = 0, errorMessage = e.message ?: "Unknown error")
+        } finally {
+            inputTemp?.delete()
+        }
+    }
+
+    private suspend fun renderAndCompress(
+        context: Context,
+        inputTemp: File,
+        settings: PdfCompressionSettings,
+        outputUri: Uri,
+        originalSize: Long
+    ): CompressionResult = withContext(Dispatchers.IO) {
+        val pfd = ParcelFileDescriptor.open(inputTemp, ParcelFileDescriptor.MODE_READ_ONLY)
+        val renderer = PdfRenderer(pfd)
+        val document = PdfDocument()
+        try {
+            for (i in 0 until renderer.pageCount) {
+                val page = renderer.openPage(i)
+                val renderWidth = (page.width * settings.scaleFactor).toInt().coerceAtLeast(1)
+                val renderHeight = (page.height * settings.scaleFactor).toInt().coerceAtLeast(1)
+                val pageBitmap = Bitmap.createBitmap(renderWidth, renderHeight, Bitmap.Config.ARGB_8888)
+                pageBitmap.eraseColor(Color.WHITE)
+                page.render(pageBitmap, null, null, PdfRenderer.Page.RENDER_MODE_FOR_PRINT)
+                page.close()
+                val compressed = compressBitmapToJpeg(pageBitmap, settings.imageQuality)
+                pageBitmap.recycle()
+                val pageInfo = PdfDocument.PageInfo.Builder(renderWidth, renderHeight, i + 1).create()
+                val docPage = document.startPage(pageInfo)
+                docPage.canvas.drawBitmap(compressed, 0f, 0f, Paint())
+                document.finishPage(docPage)
+                compressed.recycle()
+            }
+            context.contentResolver.openOutputStream(outputUri)?.use { document.writeTo(it) }
+        } finally {
+            renderer.close()
+            pfd.close()
+            document.close()
+        }
+        val compressedSize = FileUtils.getFileSize(context, outputUri)
+        CompressionResult(success = true, originalSize = originalSize,
+            compressedSize = compressedSize, outputPath = outputUri.toString())
+    }
+
     fun estimateCompressedSize(originalSize: Long, level: PdfCompressionLevel): Long {
         return (originalSize * level.getEstimatedRatio()).toLong()
+    }
+
+    fun estimateCompressedSize(originalSize: Long, settings: PdfCompressionSettings): Long {
+        val qualityRatio = settings.imageQuality / 100.0
+        val scaleRatio = settings.scaleFactor * settings.scaleFactor
+        return (originalSize * qualityRatio * scaleRatio).toLong().coerceAtLeast(1024)
     }
 }
