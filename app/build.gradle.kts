@@ -18,6 +18,34 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
+    signingConfigs {
+        create("release") {
+            val keystoreFile = System.getenv("KEYSTORE_FILE")
+                ?: (rootProject.file("local.properties").takeIf { it.exists() }
+                    ?.let { java.util.Properties().also { p -> p.load(it.inputStream()) } }
+                    ?.getProperty("keystoreFile"))
+            val storePass = System.getenv("KEYSTORE_PASSWORD")
+                ?: (rootProject.file("local.properties").takeIf { it.exists() }
+                    ?.let { java.util.Properties().also { p -> p.load(it.inputStream()) } }
+                    ?.getProperty("keystorePassword"))
+            val alias = System.getenv("KEY_ALIAS")
+                ?: (rootProject.file("local.properties").takeIf { it.exists() }
+                    ?.let { java.util.Properties().also { p -> p.load(it.inputStream()) } }
+                    ?.getProperty("keyAlias"))
+            val keyPass = System.getenv("KEY_PASSWORD")
+                ?: (rootProject.file("local.properties").takeIf { it.exists() }
+                    ?.let { java.util.Properties().also { p -> p.load(it.inputStream()) } }
+                    ?.getProperty("keyPassword"))
+
+            if (keystoreFile != null && storePass != null && alias != null && keyPass != null) {
+                storeFile = file(keystoreFile)
+                storePassword = storePass
+                keyAlias = alias
+                keyPassword = keyPass
+            }
+        }
+    }
+
     buildTypes {
         release {
             isMinifyEnabled = true
@@ -26,6 +54,10 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            val releaseConfig = signingConfigs.getByName("release")
+            if (releaseConfig.storeFile != null) {
+                signingConfig = releaseConfig
+            }
         }
         debug {
             isMinifyEnabled = false
