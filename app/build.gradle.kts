@@ -1,3 +1,5 @@
+import java.util.Properties
+
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
@@ -20,29 +22,15 @@ android {
 
     signingConfigs {
         create("release") {
-            val keystoreFile = System.getenv("KEYSTORE_FILE")
-                ?: (rootProject.file("local.properties").takeIf { it.exists() }
-                    ?.let { java.util.Properties().also { p -> p.load(it.inputStream()) } }
-                    ?.getProperty("keystoreFile"))
-            val storePass = System.getenv("KEYSTORE_PASSWORD")
-                ?: (rootProject.file("local.properties").takeIf { it.exists() }
-                    ?.let { java.util.Properties().also { p -> p.load(it.inputStream()) } }
-                    ?.getProperty("keystorePassword"))
-            val alias = System.getenv("KEY_ALIAS")
-                ?: (rootProject.file("local.properties").takeIf { it.exists() }
-                    ?.let { java.util.Properties().also { p -> p.load(it.inputStream()) } }
-                    ?.getProperty("keyAlias"))
-            val keyPass = System.getenv("KEY_PASSWORD")
-                ?: (rootProject.file("local.properties").takeIf { it.exists() }
-                    ?.let { java.util.Properties().also { p -> p.load(it.inputStream()) } }
-                    ?.getProperty("keyPassword"))
-
-            if (keystoreFile != null && storePass != null && alias != null && keyPass != null) {
-                storeFile = file(keystoreFile)
-                storePassword = storePass
-                keyAlias = alias
-                keyPassword = keyPass
+            val localProps = Properties().apply {
+                val f = rootProject.file("local.properties")
+                if (f.exists()) load(f.inputStream())
             }
+            storeFile = (System.getenv("KEYSTORE_FILE") ?: localProps.getProperty("keystoreFile"))
+                ?.let { file(it) }
+            storePassword = System.getenv("KEYSTORE_PASSWORD") ?: localProps.getProperty("keystorePassword")
+            keyAlias = System.getenv("KEY_ALIAS") ?: localProps.getProperty("keyAlias")
+            keyPassword = System.getenv("KEY_PASSWORD") ?: localProps.getProperty("keyPassword")
         }
     }
 
