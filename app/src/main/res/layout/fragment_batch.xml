@@ -2,6 +2,7 @@
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
@@ -105,6 +106,17 @@
             app:icon="@drawable/ic_compress" />
     </LinearLayout>
 
+    <TextView
+        android:id="@+id/textBatchSaveSuccess"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:textColor="?attr/colorPrimary"
+        android:textSize="14sp"
+        android:textStyle="bold"
+        android:visibility="gone"
+        tools:text="Saved files to: /storage/emulated/0/Download/CompressX/" />
+
     <com.google.android.material.button.MaterialButton
         android:id="@+id/buttonShareAll"
         android:layout_width="match_parent"
@@ -113,5 +125,14 @@
         android:text="@string/share_all_completed"
         android:visibility="gone"
         app:icon="@drawable/ic_share" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/buttonOpenFolderBatch"
+        style="@style/Widget.Material3.Button.OutlinedButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="Open Folder"
+        android:visibility="gone" />
 
 </LinearLayout>
