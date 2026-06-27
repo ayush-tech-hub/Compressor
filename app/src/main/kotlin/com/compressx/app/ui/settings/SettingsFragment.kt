@@ -35,7 +35,7 @@ class SettingsFragment : Fragment() {
 
         binding.buttonSupportEmail.setOnClickListener {
             val intent = Intent(Intent.ACTION_SENDTO).apply {
-                data = Uri.parse("mailto:weedywhy@gmail.com")
+                data = Uri.parse("mailto:ayushallop@gmail.com")
                 putExtra(Intent.EXTRA_SUBJECT, "CompressX Support / Feedback")
             }
             try {
