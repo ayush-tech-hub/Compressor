@@ -37,7 +37,54 @@
                 android:lineSpacingExtra="6dp" />
         </com.google.android.material.card.MaterialCardView>
 
+        <!-- About Section Header -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/settings_about_title"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:layout_marginTop="24dp"
+            android:layout_marginBottom="12dp" />
 
+        <!-- About Card -->
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
+            app:cardCornerRadius="12dp"
+            app:cardElevation="2dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/app_name"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    android:layout_marginBottom="4dp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/settings_app_version"
+                    android:textSize="14sp"
+                    android:textColor="?android:textColorSecondary"
+                    android:layout_marginBottom="16dp" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/buttonShowWelcome"
+                    style="@style/Widget.Material3.Button.OutlinedButton"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/settings_show_welcome" />
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
 
         <!-- Support & Feedback Section Header -->
         <TextView
@@ -64,25 +111,19 @@
                 android:padding="16dp">
 
                 <TextView
-                    android:layout_width="match_parent"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/settings_support_body"
                     android:textSize="14sp"
                     android:layout_marginBottom="12dp" />
 
-                <TextView
-                    android:id="@+id/textSupportEmail"
-                    android:layout_width="wrap_content"
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/buttonSupportEmail"
+                    style="@style/Widget.Material3.Button.OutlinedButton"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="weedywhy@gmail.com"
-                    android:textSize="15sp"
-                    android:textStyle="bold"
-                    android:textColor="?attr/colorPrimary"
-                    android:clickable="true"
-                    android:focusable="true"
-                    android:background="?attr/selectableItemBackground"
-                    android:drawablePadding="8dp"
-                    app:drawableStartCompat="@drawable/ic_email" />
+                    android:text="@string/settings_support_email"
+                    app:icon="@drawable/ic_email" />
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 

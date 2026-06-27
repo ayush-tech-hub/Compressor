@@ -1,5 +1,6 @@
 package com.compressx.app.util
 
+import android.app.DownloadManager
 import android.content.ContentValues
 import android.content.Context
 import android.content.Intent
@@ -9,19 +10,10 @@ import android.os.Environment
 import android.provider.MediaStore
 import android.provider.OpenableColumns
 import android.webkit.MimeTypeMap
-import android.widget.Toast
-import androidx.core.content.FileProvider
 import java.io.File
 import java.io.FileOutputStream
 
 object FileUtils {
-
-    data class FileSaveResult(
-        val uri: Uri?,
-        val absolutePath: String?,
-        val success: Boolean,
-        val errorMessage: String? = null
-    )
 
     fun getFileName(context: Context, uri: Uri): String {
         var name = "unknown"
@@ -98,89 +90,51 @@ object FileUtils {
         }
     }
 
-    fun saveToCompressX(context: Context, sourceFile: File, fileName: String, mimeType: String): FileSaveResult {
-        val downloadDir = File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS), "CompressX")
-        if (!downloadDir.exists()) {
-            downloadDir.mkdirs()
-        }
-        val targetFile = File(downloadDir, fileName)
-        
-        try {
-            sourceFile.inputStream().use { input ->
-                FileOutputStream(targetFile).use { output ->
-                    input.copyTo(output)
-                }
-            }
-            return FileSaveResult(Uri.fromFile(targetFile), targetFile.absolutePath, true)
-        } catch (e: Exception) {
+    /**
+     * Saves [sourceFile] to /Download/CompressX/[fileName].
+     * Returns (contentUri, displayPath) on success, null on failure.
+     */
+    fun saveToCompressXDownloads(
+        context: Context,
+        sourceFile: File,
+        fileName: String,
+        mimeType: String
+    ): Pair<Uri, String>? {
+        return try {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                try {
-                    val resolver = context.contentResolver
-                    val contentValues = ContentValues().apply {
-                        put(MediaStore.MediaColumns.DISPLAY_NAME, fileName)
-                        put(MediaStore.MediaColumns.MIME_TYPE, mimeType)
-                        put(MediaStore.MediaColumns.RELATIVE_PATH, "Download/CompressX")
-                    }
-                    val uri = resolver.insert(MediaStore.Downloads.EXTERNAL_CONTENT_URI, contentValues)
-                    if (uri != null) {
-                        resolver.openOutputStream(uri)?.use { output ->
-                            sourceFile.inputStream().use { input ->
-                                input.copyTo(output)
-                            }
-                        }
-                        return FileSaveResult(uri, targetFile.absolutePath, true)
-                    }
-                } catch (ex: Exception) {
-                    return FileSaveResult(null, null, false, ex.message)
+                val values = ContentValues().apply {
+                    put(MediaStore.Downloads.DISPLAY_NAME, fileName)
+                    put(MediaStore.Downloads.MIME_TYPE, mimeType)
+                    put(MediaStore.Downloads.RELATIVE_PATH, "Download/CompressX")
                 }
+                val insertUri = context.contentResolver.insert(
+                    MediaStore.Downloads.EXTERNAL_CONTENT_URI, values
+                ) ?: return null
+                context.contentResolver.openOutputStream(insertUri)?.use { out ->
+                    sourceFile.inputStream().use { it.copyTo(out) }
+                }
+                val displayPath = "/storage/emulated/0/Download/CompressX/$fileName"
+                Pair(insertUri, displayPath)
+            } else {
+                val dir = File(
+                    Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS),
+                    "CompressX"
+                ).also { it.mkdirs() }
+                val dest = File(dir, fileName)
+                sourceFile.copyTo(dest, overwrite = true)
+                Pair(Uri.fromFile(dest), dest.absolutePath)
             }
-            return FileSaveResult(null, null, false, e.message)
+        } catch (e: Exception) {
+            null
         }
     }
 
     fun openCompressXFolder(context: Context) {
-        val downloadDir = File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS), "CompressX")
-        if (!downloadDir.exists()) {
-            downloadDir.mkdirs()
-        }
-        
-        val intent = Intent(Intent.ACTION_VIEW).apply {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                val authority = "com.android.externalstorage.documents"
-                val documentId = "primary:Download/CompressX"
-                val uri = android.provider.DocumentsContract.buildDocumentUri(authority, documentId)
-                setDataAndType(uri, "vnd.android.document/directory")
-            } else {
-                val uri = Uri.fromFile(downloadDir)
-                setDataAndType(uri, "resource/folder")
-            }
-            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-        }
         try {
+            val intent = Intent(DownloadManager.ACTION_VIEW_DOWNLOADS)
             context.startActivity(intent)
-        } catch (e: Exception) {
-            try {
-                context.startActivity(Intent(Intent.ACTION_VIEW).apply {
-                    setDataAndType(Uri.parse("content://media/external/file"), "resource/folder")
-                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                })
-            } catch (ex: Exception) {
-                Toast.makeText(context, "No File Manager found to open the folder", Toast.LENGTH_SHORT).show()
-            }
-        }
-    }
-
-    fun getShareableUri(context: Context, fileUri: Uri): Uri {
-        return try {
-            if (fileUri.scheme == "file") {
-                val file = File(fileUri.path ?: return fileUri)
-                FileProvider.getUriForFile(context, "com.compressx.app.fileprovider", file)
-            } else {
-                fileUri
-            }
-        } catch (e: Exception) {
-            fileUri
+        } catch (_: Exception) {
+            // No downloads app available — silently ignore
         }
     }
 }

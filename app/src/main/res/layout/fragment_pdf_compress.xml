@@ -323,7 +323,7 @@
             android:id="@+id/buttonCompress"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/compress"
+            android:text="@string/compress_button"
             android:enabled="false"
             android:layout_marginBottom="@dimen/card_margin"
             app:icon="@drawable/ic_compress" />
@@ -391,100 +391,41 @@
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- Save Success Message -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/buttonShare"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="8dp"
+                android:text="@string/share"
+                app:icon="@drawable/ic_share" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/buttonSave"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="8dp"
+                android:text="@string/save_to_downloads"
+                app:icon="@drawable/ic_save" />
+
             <TextView
-                android:id="@+id/textSaveSuccess"
+                android:id="@+id/textSavedPath"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="12dp"
-                android:textColor="?attr/colorPrimary"
-                android:textSize="14sp"
-                android:textStyle="bold"
                 android:visibility="gone"
-                tools:text="Saved to: /storage/emulated/0/Download/CompressX/document_compressed.pdf" />
+                android:textSize="12sp"
+                android:textColor="?attr/colorPrimary"
+                android:layout_marginBottom="4dp"
+                android:paddingStart="4dp" />
 
-            <!-- Action buttons -->
-            <!-- Row 1: Save & Share -->
-            <LinearLayout
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/buttonOpenFolder"
+                style="@style/Widget.Material3.Button.OutlinedButton"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:layout_marginBottom="8dp">
+                android:visibility="gone"
+                android:text="@string/open_folder"
+                app:icon="@drawable/ic_folder_open" />
 
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/buttonSave"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:layout_marginEnd="4dp"
-                    android:text="Save"
-                    app:icon="@drawable/ic_compress" />
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/buttonShare"
-                    style="@style/Widget.Material3.Button.OutlinedButton"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:layout_marginStart="4dp"
-                    android:text="@string/share"
-                    app:icon="@drawable/ic_share" />
-            </LinearLayout>
-
-            <!-- Row 2: Open & Open Folder -->
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:layout_marginBottom="8dp">
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/buttonOpen"
-                    style="@style/Widget.Material3.Button.OutlinedButton"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:layout_marginEnd="4dp"
-                    android:text="@string/open" />
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/buttonOpenFolder"
-                    style="@style/Widget.Material3.Button.OutlinedButton"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:layout_marginStart="4dp"
-                    android:text="Open Folder"
-                    android:visibility="gone" />
-            </LinearLayout>
-
-            <!-- Row 3: Rename & Delete -->
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal">
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/buttonRename"
-                    style="@style/Widget.Material3.Button.OutlinedButton"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:layout_marginEnd="4dp"
-                    android:text="@string/rename"
-                    app:icon="@drawable/ic_edit" />
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/buttonDelete"
-                    style="@style/Widget.Material3.Button.OutlinedButton"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:layout_marginStart="4dp"
-                    android:text="@string/delete"
-                    app:icon="@drawable/ic_delete" />
-
-            </LinearLayout>
         </LinearLayout>
 
     </LinearLayout>
