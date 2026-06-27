@@ -29,25 +29,16 @@ class SettingsFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        binding.buttonShowWelcome.setOnClickListener {
+            findNavController().navigate(R.id.action_settingsFragment_to_welcomeFragment)
+        }
 
-
-        binding.textSupportEmail.setOnClickListener {
+        binding.buttonSupportEmail.setOnClickListener {
             val intent = Intent(Intent.ACTION_SENDTO).apply {
                 data = Uri.parse("mailto:weedywhy@gmail.com")
                 putExtra(Intent.EXTRA_SUBJECT, "CompressX Support / Feedback")
             }
             try {
-                startActivity(intent)
-            } catch (e: Exception) {
-                Toast.makeText(requireContext(), "No email client found", Toast.LENGTH_SHORT).show()
-            }
-        }
-
-        binding.buttonSupportEmail.setOnClickListener {
-            try {
-                val intent = Intent(Intent.ACTION_SENDTO).apply {
-                    data = Uri.parse("mailto:weedywhy@gmail.com")
-                }
                 startActivity(intent)
             } catch (_: Exception) {
                 Toast.makeText(requireContext(), R.string.no_email_app, Toast.LENGTH_SHORT).show()
