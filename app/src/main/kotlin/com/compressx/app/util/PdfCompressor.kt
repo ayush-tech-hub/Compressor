@@ -16,6 +16,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.ByteArrayOutputStream
 import java.io.File
+import java.io.FileOutputStream
 
 object PdfCompressor {
 
@@ -180,6 +181,129 @@ object PdfCompressor {
         val compressedSize = FileUtils.getFileSize(context, outputUri)
         CompressionResult(success = true, originalSize = originalSize,
             compressedSize = compressedSize, outputPath = outputUri.toString())
+    }
+
+    suspend fun compressToTempFile(
+        context: Context,
+        inputUri: Uri,
+        compressionLevel: PdfCompressionLevel
+    ): Pair<CompressionResult, File?> = withContext(Dispatchers.IO) {
+        var inputTemp: File? = null
+        var outputTemp: File? = null
+        try {
+            val originalSize = FileUtils.getFileSize(context, inputUri)
+            inputTemp = FileUtils.copyUriToTempFile(context, inputUri, "pdf")
+                ?: return@withContext Pair(
+                    CompressionResult(success = false, originalSize = originalSize, compressedSize = 0, errorMessage = "Failed to read input PDF"),
+                    null
+                )
+
+            val scale = compressionLevel.getPageScale()
+            val jpegQuality = compressionLevel.getImageQuality()
+
+            outputTemp = FileUtils.createTempFile(context, "compressed_pdf_", "pdf")
+            val pfd = ParcelFileDescriptor.open(inputTemp, ParcelFileDescriptor.MODE_READ_ONLY)
+            val renderer = PdfRenderer(pfd)
+            val document = PdfDocument()
+            try {
+                for (i in 0 until renderer.pageCount) {
+                    val page = renderer.openPage(i)
+                    val w = (page.width * scale).toInt().coerceAtLeast(1)
+                    val h = (page.height * scale).toInt().coerceAtLeast(1)
+                    val bmp = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888)
+                    bmp.eraseColor(Color.WHITE)
+                    page.render(bmp, null, null, PdfRenderer.Page.RENDER_MODE_FOR_PRINT)
+                    page.close()
+                    val compressed = compressBitmapToJpeg(bmp, jpegQuality)
+                    bmp.recycle()
+                    val pageInfo = PdfDocument.PageInfo.Builder(w, h, i + 1).create()
+                    val docPage = document.startPage(pageInfo)
+                    docPage.canvas.drawBitmap(compressed, 0f, 0f, Paint())
+                    document.finishPage(docPage)
+                    compressed.recycle()
+                }
+                FileOutputStream(outputTemp).use { document.writeTo(it) }
+            } finally {
+                renderer.close(); pfd.close(); document.close()
+            }
+
+            Pair(
+                CompressionResult(success = true, originalSize = originalSize, compressedSize = outputTemp.length(), outputPath = outputTemp.absolutePath),
+                outputTemp
+            )
+        } catch (e: Exception) {
+            outputTemp?.delete()
+            Pair(
+                CompressionResult(success = false, originalSize = FileUtils.getFileSize(context, inputUri), compressedSize = 0, errorMessage = e.message ?: "Unknown error"),
+                null
+            )
+        } finally {
+            inputTemp?.delete()
+        }
+    }
+
+    suspend fun compressToTempFile(
+        context: Context,
+        inputUri: Uri,
+        settings: PdfCompressionSettings
+    ): Pair<CompressionResult, File?> = withContext(Dispatchers.IO) {
+        var inputTemp: File? = null
+        var outputTemp: File? = null
+        try {
+            val originalSize = FileUtils.getFileSize(context, inputUri)
+            inputTemp = FileUtils.copyUriToTempFile(context, inputUri, "pdf")
+                ?: return@withContext Pair(
+                    CompressionResult(success = false, originalSize = originalSize, compressedSize = 0, errorMessage = "Failed to read input PDF"),
+                    null
+                )
+
+            outputTemp = FileUtils.createTempFile(context, "compressed_pdf_", "pdf")
+            var currentQuality = settings.imageQuality
+
+            do {
+                val s = settings.copy(imageQuality = currentQuality)
+                val pfd = ParcelFileDescriptor.open(inputTemp, ParcelFileDescriptor.MODE_READ_ONLY)
+                val renderer = PdfRenderer(pfd)
+                val document = PdfDocument()
+                try {
+                    for (i in 0 until renderer.pageCount) {
+                        val page = renderer.openPage(i)
+                        val w = (page.width * s.scaleFactor).toInt().coerceAtLeast(1)
+                        val h = (page.height * s.scaleFactor).toInt().coerceAtLeast(1)
+                        val bmp = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888)
+                        bmp.eraseColor(Color.WHITE)
+                        page.render(bmp, null, null, PdfRenderer.Page.RENDER_MODE_FOR_PRINT)
+                        page.close()
+                        val compressed = compressBitmapToJpeg(bmp, s.imageQuality)
+                        bmp.recycle()
+                        val pageInfo = PdfDocument.PageInfo.Builder(w, h, i + 1).create()
+                        val docPage = document.startPage(pageInfo)
+                        docPage.canvas.drawBitmap(compressed, 0f, 0f, Paint())
+                        document.finishPage(docPage)
+                        compressed.recycle()
+                    }
+                    FileOutputStream(outputTemp).use { document.writeTo(it) }
+                } finally {
+                    renderer.close(); pfd.close(); document.close()
+                }
+                if (settings.targetFileSizeBytes == null) break
+                if (outputTemp.length() <= settings.targetFileSizeBytes) break
+                currentQuality -= 10
+            } while (currentQuality >= 10)
+
+            Pair(
+                CompressionResult(success = true, originalSize = originalSize, compressedSize = outputTemp.length(), outputPath = outputTemp.absolutePath),
+                outputTemp
+            )
+        } catch (e: Exception) {
+            outputTemp?.delete()
+            Pair(
+                CompressionResult(success = false, originalSize = FileUtils.getFileSize(context, inputUri), compressedSize = 0, errorMessage = e.message ?: "Unknown error"),
+                null
+            )
+        } finally {
+            inputTemp?.delete()
+        }
     }
 
     fun estimateCompressedSize(originalSize: Long, level: PdfCompressionLevel): Long {

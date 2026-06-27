@@ -42,6 +42,17 @@ class SettingsFragment : Fragment() {
                 Toast.makeText(requireContext(), "No email client found", Toast.LENGTH_SHORT).show()
             }
         }
+
+        binding.buttonSupportEmail.setOnClickListener {
+            try {
+                val intent = Intent(Intent.ACTION_SENDTO).apply {
+                    data = Uri.parse("mailto:weedywhy@gmail.com")
+                }
+                startActivity(intent)
+            } catch (_: Exception) {
+                Toast.makeText(requireContext(), R.string.no_email_app, Toast.LENGTH_SHORT).show()
+            }
+        }
     }
 
     override fun onDestroyView() {

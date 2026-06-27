@@ -92,6 +92,80 @@ object ImageCompressor {
         }
     }
 
+    /**
+     * Compresses the image to a temp file without deleting it.
+     * Caller is responsible for deleting the returned File when done.
+     */
+    suspend fun compressToTempFile(
+        context: Context,
+        inputUri: Uri,
+        quality: Int
+    ): Pair<CompressionResult, File?> = withContext(Dispatchers.IO) {
+        var tempFile: File? = null
+        try {
+            val originalSize = FileUtils.getFileSize(context, inputUri)
+            val extension = FileUtils.getExtension(context, inputUri).ifEmpty { "jpg" }
+
+            val boundsOptions = BitmapFactory.Options().apply { inJustDecodeBounds = true }
+            context.contentResolver.openInputStream(inputUri)?.use {
+                BitmapFactory.decodeStream(it, null, boundsOptions)
+            }
+            val sampleSize = calculateInSampleSize(boundsOptions, 4096, 4096)
+            val decodeOptions = BitmapFactory.Options().apply {
+                inSampleSize = sampleSize
+                inPreferredConfig = Bitmap.Config.ARGB_8888
+            }
+            val bitmap = context.contentResolver.openInputStream(inputUri)?.use {
+                BitmapFactory.decodeStream(it, null, decodeOptions)
+            } ?: return@withContext Pair(
+                CompressionResult(success = false, originalSize = originalSize, compressedSize = 0, errorMessage = "Failed to decode image"),
+                null
+            )
+
+            val format = when (extension.lowercase()) {
+                "png" -> Bitmap.CompressFormat.PNG
+                "webp" -> if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                    Bitmap.CompressFormat.WEBP_LOSSY
+                } else {
+                    @Suppress("DEPRECATION") Bitmap.CompressFormat.WEBP
+                }
+                else -> Bitmap.CompressFormat.JPEG
+            }
+
+            tempFile = FileUtils.createTempFile(context, "compressed_", extension)
+            FileOutputStream(tempFile).use { out ->
+                bitmap.compress(format, quality.coerceIn(1, 100), out)
+            }
+            bitmap.recycle()
+
+            if (format == Bitmap.CompressFormat.JPEG) {
+                ExifHelper.copyExif(context, inputUri, tempFile.absolutePath)
+            }
+
+            val compressedSize = tempFile.length()
+            Pair(
+                CompressionResult(
+                    success = true,
+                    originalSize = originalSize,
+                    compressedSize = compressedSize,
+                    outputPath = tempFile.absolutePath
+                ),
+                tempFile
+            )
+        } catch (e: Exception) {
+            tempFile?.delete()
+            Pair(
+                CompressionResult(
+                    success = false,
+                    originalSize = FileUtils.getFileSize(context, inputUri),
+                    compressedSize = 0,
+                    errorMessage = e.message ?: "Unknown error"
+                ),
+                null
+            )
+        }
+    }
+
     fun estimateCompressedSize(originalSize: Long, quality: Int): Long {
         val ratio = when {
             quality >= 80 -> 0.75
