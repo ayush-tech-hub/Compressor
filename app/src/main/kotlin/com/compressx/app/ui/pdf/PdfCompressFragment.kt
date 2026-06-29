@@ -107,6 +107,7 @@ class PdfCompressFragment : Fragment() {
                 binding.imagePdfIcon.isVisible = true
                 binding.textNoPdfSelected.isVisible = false
                 binding.buttonCompress.isEnabled = true
+                binding.buttonCompressCustom.isEnabled = true
                 binding.cardFileInfo.isVisible = true
                 binding.groupResult.isVisible = false
             }
@@ -126,7 +127,9 @@ class PdfCompressFragment : Fragment() {
 
         viewModel.isCompressing.observe(viewLifecycleOwner) { compressing ->
             binding.progressCompressing.isVisible = compressing
-            binding.buttonCompress.isEnabled = !compressing && viewModel.selectedUri.value != null
+            val hasFile = viewModel.selectedUri.value != null
+            binding.buttonCompress.isEnabled = !compressing && hasFile
+            binding.buttonCompressCustom.isEnabled = !compressing && hasFile
             binding.buttonSave.isEnabled = !compressing
         }
 
@@ -172,6 +175,10 @@ class PdfCompressFragment : Fragment() {
         }
 
         binding.buttonCompress.setOnClickListener {
+            viewModel.compress()
+        }
+
+        binding.buttonCompressCustom.setOnClickListener {
             viewModel.compress()
         }
 
