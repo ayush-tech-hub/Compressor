@@ -10,6 +10,7 @@ import android.os.Environment
 import android.provider.MediaStore
 import android.provider.OpenableColumns
 import android.webkit.MimeTypeMap
+import androidx.core.content.FileProvider
 import java.io.File
 import java.io.FileOutputStream
 
@@ -127,6 +128,12 @@ object FileUtils {
         } catch (e: Exception) {
             null
         }
+    }
+
+    fun getShareableUri(context: Context, uri: Uri): Uri {
+        if (uri.scheme == "content") return uri
+        val file = File(uri.path ?: throw IllegalArgumentException("Invalid URI: $uri"))
+        return FileProvider.getUriForFile(context, "${context.packageName}.fileprovider", file)
     }
 
     fun openCompressXFolder(context: Context) {

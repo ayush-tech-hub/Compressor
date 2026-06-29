@@ -148,10 +148,10 @@ class BatchFragment : Fragment() {
                     if (file.exists()) {
                         val fileName = file.name
                         val mimeType = if (fileName.endsWith(".pdf", ignoreCase = true)) "application/pdf" else "image/jpeg"
-                        val saveResult = FileUtils.saveToCompressX(requireContext(), file, fileName, mimeType)
-                        if (saveResult.success && saveResult.uri != null) {
+                        val saveResult = FileUtils.saveToCompressXDownloads(requireContext(), file, fileName, mimeType)
+                        if (saveResult != null) {
                             successCount++
-                            savedBatchUris.add(saveResult.uri)
+                            savedBatchUris.add(saveResult.first)
                         }
                     }
                 } catch (e: Exception) {
