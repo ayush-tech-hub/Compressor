@@ -44,27 +44,15 @@ class ImageCompressFragment : Fragment() {
 
     private fun setupQualitySelector() {
         binding.radioGroupQuality.setOnCheckedChangeListener { _, checkedId ->
+            val isCustom = checkedId == R.id.radioCustom
+            binding.seekBarQuality.isVisible = isCustom
+            binding.textQualityValue.isVisible = isCustom
+            binding.buttonCompressInline.isVisible = isCustom
             when (checkedId) {
-                R.id.radioLow -> {
-                    binding.seekBarQuality.isVisible = false
-                    binding.textQualityValue.isVisible = false
-                    viewModel.setQuality(CompressionQuality.LOW.value)
-                }
-                R.id.radioMedium -> {
-                    binding.seekBarQuality.isVisible = false
-                    binding.textQualityValue.isVisible = false
-                    viewModel.setQuality(CompressionQuality.MEDIUM.value)
-                }
-                R.id.radioHigh -> {
-                    binding.seekBarQuality.isVisible = false
-                    binding.textQualityValue.isVisible = false
-                    viewModel.setQuality(CompressionQuality.HIGH.value)
-                }
-                R.id.radioCustom -> {
-                    binding.seekBarQuality.isVisible = true
-                    binding.textQualityValue.isVisible = true
-                    viewModel.setQuality(binding.seekBarQuality.progress.coerceAtLeast(1))
-                }
+                R.id.radioLow   -> viewModel.setQuality(CompressionQuality.LOW.value)
+                R.id.radioMedium -> viewModel.setQuality(CompressionQuality.MEDIUM.value)
+                R.id.radioHigh  -> viewModel.setQuality(CompressionQuality.HIGH.value)
+                R.id.radioCustom -> viewModel.setQuality(binding.seekBarQuality.progress.coerceAtLeast(1))
             }
         }
 
@@ -90,6 +78,7 @@ class ImageCompressFragment : Fragment() {
                 binding.imagePreview.isVisible = true
                 binding.textSelectHint.isVisible = false
                 binding.buttonCompress.isEnabled = true
+                binding.buttonCompressInline.isEnabled = true
                 binding.cardFileInfo.isVisible = true
                 binding.groupResult.isVisible = false
             }
@@ -110,7 +99,9 @@ class ImageCompressFragment : Fragment() {
 
         viewModel.isCompressing.observe(viewLifecycleOwner) { compressing ->
             binding.progressCompressing.isVisible = compressing
-            binding.buttonCompress.isEnabled = !compressing && viewModel.selectedUri.value != null
+            val hasFile = viewModel.selectedUri.value != null
+            binding.buttonCompress.isEnabled = !compressing && hasFile
+            binding.buttonCompressInline.isEnabled = !compressing && hasFile
             binding.buttonSave.isEnabled = !compressing
         }
 
@@ -160,6 +151,10 @@ class ImageCompressFragment : Fragment() {
         }
 
         binding.buttonCompress.setOnClickListener {
+            viewModel.compress()
+        }
+
+        binding.buttonCompressInline.setOnClickListener {
             viewModel.compress()
         }
 
